@@ -11,11 +11,13 @@ class TestSNDense(unittest.TestCase):
         layer = SpectralNormalization(
             Conv2D(filters=4, kernel_size=3))
         layer(np.zeros(shape=(1, 10, 10, 1), dtype=np.float32))
+        layer.get_config()
 
     def test_fc(self):
         layer = SpectralNormalization(
             Dense(units=10))
         layer(np.zeros(shape=(1, 10), dtype=np.float32))
+        layer.get_config()
 
 
 if __name__ == "__main__":
