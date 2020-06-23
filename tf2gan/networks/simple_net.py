@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Dense
 
-from tf2gan.networks.spectral_norm_dense import SNDense
+from tf2gan.networks.spectral_norm import SpectralNormalization as SN
 
 
 class Base(tf.keras.Model):
@@ -40,16 +40,18 @@ class Discriminator(Base):
     def __init__(self, img_size, enable_sn=False, name="Discriminator"):
         super().__init__(name=name)
 
-        DenseClass = SNDense if enable_sn else Dense
         self._layers = [
             tf.keras.layers.Conv2D(
                 filters=32, kernel_size=3, strides=(2, 2), activation='relu'),
             tf.keras.layers.Conv2D(
                 filters=64, kernel_size=3, strides=(2, 2), activation='relu'),
             tf.keras.layers.Flatten(),
-            DenseClass(256, activation='relu'),
-            DenseClass(1)]
-        self._layers.append(DenseClass(1))
+            Dense(256, activation='relu'),
+            Dense(1)]
+
+        if enable_sn:
+            for idx, layer in enumerate(self._layers):
+                self._layers[idx] = SN(layer)
 
         dummy_img = tf.constant(np.zeros(shape=(1,) + img_size, dtype=np.float32))
         with tf.device("/cpu:0"):
